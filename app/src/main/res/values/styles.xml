@@ -8,4 +8,18 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="CustomEditTextStyle" parent="@android:style/Widget.EditText">
+        <item name="android:layout_marginStart">32dp</item>
+        <item name="android:layout_marginEnd">32dp</item>
+        <item name="android:drawablePadding">16dp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:ems">10</item>
+        <item name="android:textSize">25sp</item>
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <style name="FirebaseUI">
+        <item name="android:paddingTop">16dp</item>
+    </style>
+
 </resources>

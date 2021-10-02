@@ -14,7 +14,8 @@
         <entry key="..\:/Users/Teja/Desktop/KotlinProjects/LocationReminderApp/app/src/main/res/drawable/ic_save.xml" value="0.3651041666666667" />
         <entry key="..\:/Users/Teja/Desktop/KotlinProjects/LocationReminderApp/app/src/main/res/layout/activity_authentication.xml" value="0.24139492753623187" />
         <entry key="..\:/Users/Teja/Desktop/KotlinProjects/LocationReminderApp/app/src/main/res/layout/auth_custom_method_picker_layout.xml" value="0.3489583333333333" />
-        <entry key="..\:/Users/Teja/Desktop/KotlinProjects/LocationReminderApp/app/src/main/res/layout/fragment_save_reminder.xml" value="0.21829710144927536" />
+        <entry key="..\:/Users/Teja/Desktop/KotlinProjects/LocationReminderApp/app/src/main/res/layout/fragment_save_reminder.xml" value="0.1" />
+        <entry key="..\:/Users/Teja/Desktop/KotlinProjects/LocationReminderApp/app/src/main/res/layout/fragment_select_location.xml" value="0.25" />
       </map>
     </option>
   </component>

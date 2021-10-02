@@ -18,8 +18,4 @@
         <item name="android:background">@color/white</item>
     </style>
 
-    <style name="FirebaseUI">
-        <item name="android:paddingTop">16dp</item>
-    </style>
-
 </resources>

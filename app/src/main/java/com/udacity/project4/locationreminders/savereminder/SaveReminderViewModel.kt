@@ -16,7 +16,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     BaseViewModel(app) {
     val reminderTitle = MutableLiveData<String>()
     val reminderDescription = MutableLiveData<String>()
-    val reminderSelectedLocationStr = MutableLiveData<String>()
+    val reminderSelectedLocationStr = MutableLiveData<String>("Not selected")
     val selectedPOI = MutableLiveData<PointOfInterest>()
     val latitude = MutableLiveData<Double>()
     val longitude = MutableLiveData<Double>()

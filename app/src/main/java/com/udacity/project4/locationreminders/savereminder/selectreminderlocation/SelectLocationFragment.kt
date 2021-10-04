@@ -12,6 +12,7 @@ import android.view.animation.LinearInterpolator
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
+import androidx.navigation.findNavController
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -24,13 +25,9 @@ import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
+import kotlinx.android.synthetic.main.fragment_select_location.*
 import kotlinx.android.synthetic.main.layout_bottom_sheet.*
 import org.koin.android.ext.android.inject
-
-// TODO: Hide the reminder text on select a location
-// TODO: Add the add location fab button that returns user to the save reminder page
-// TODO: Rework app so as to set the viewModel data only after the user selects the fab button
-//  does the data get set onto the viewModel
 
 class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.OnItemSelectedListener {
 
@@ -40,10 +37,14 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
     private lateinit var binding: FragmentSelectLocationBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+    private var selectedPOI: PointOfInterest? = null
+    private var updatedPOIName: String? = null
+    private var transitionType: String = "Enter"
+    private var geofenceRadius: Double = 100.00
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_select_location, container, false)
 
@@ -66,11 +67,21 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
     }
 
     private fun onLocationSelected() {
-        // TODO: When the user confirms on the selected location,
+        // When the user confirms on the selected location,
         //  send back the selected location details to the view model
         //  and navigate back to the previous fragment to save the reminder and add the geofence
-    }
 
+        // 1. Set data in viewModel
+        _viewModel.selectedPOI.value = selectedPOI
+        _viewModel.latitude.value = selectedPOI?.latLng?.latitude
+        _viewModel.longitude.value = selectedPOI?.latLng?.longitude
+        _viewModel.reminderSelectedLocationStr.value = updatedPOIName
+        _viewModel.transitionType.value = transitionType
+        _viewModel.geofenceRadius.value = geofenceRadius
+
+        // 2. return back to save reminder screen
+        view?.findNavController()?.popBackStack()
+    }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.map_options, menu)
@@ -140,18 +151,13 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
         // put a marker to location that the user selected
         map.setOnPoiClickListener { poi ->
 
-            // Update the map location Text to not have unnecessarily large blank text
-            val poiName = poi.name.replace(
+            // Set the new Data
+            selectedPOI = poi
+            updatedPOIName = poi.name.replace(
                 "\n" +
                         "           \n" +
                         "             …", ""
-            )
-
-            // Set the new Data
-            _viewModel.selectedPOI.value = poi
-            _viewModel.latitude.value = poi.latLng.latitude
-            _viewModel.longitude.value = poi.latLng.longitude
-            _viewModel.reminderSelectedLocationStr.value = poiName
+            ) // Update the map location Text to not have unnecessarily large blank text
 
             // Move camera to the selected location
             map.moveCamera(
@@ -163,9 +169,15 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
             // Method for extra stuff
             updateMap()
 
+            // hide the reminder text
+            binding.reminderText.visibility = View.GONE
+
+            // Show the select this location fab button
+            select_location_fab.show()
+
             // show Bottom Drawer
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            location_title_text.text = poiName
+            location_title_text.text = updatedPOIName
         }
     }
 
@@ -205,8 +217,9 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
                 seek: SeekBar,
                 progress: Int, fromUser: Boolean
             ) {
-                _viewModel.geofenceRadius.value = ((progress / 100.00) * maxCircleRadius)
-                slider_amount.text = "${_viewModel.geofenceRadius.value!!.toInt()}m"
+                geofenceRadius = ((progress / 100.00) * maxCircleRadius)
+                slider_amount.text =
+                    getString(R.string.styled_meters_text, geofenceRadius.toInt())
                 updateMap()
             }
 
@@ -226,11 +239,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
         spinner.adapter = adapter
         spinner.onItemSelectedListener = this
 
-        slider_amount.text = "100m"
-
-
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-
         // Reminding the user to select a location
         val animator = ValueAnimator.ofFloat(0.0f, 1.0f)
         animator.repeatCount = ValueAnimator.INFINITE
@@ -239,7 +247,16 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
         animator.addUpdateListener { animation ->
             binding.reminderText.alpha = animation.animatedValue as Float
         }
+
+        // setup the fab button
+        select_location_fab.setOnClickListener {
+            onLocationSelected()
+        }
+
+        slider_amount.text = getString(R.string.styled_meters_text, 100)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         animator.start()
+        select_location_fab.hide()
     }
 
     private fun updateMap() {
@@ -247,15 +264,15 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
 
         val poiMarker = map.addMarker(
             MarkerOptions()
-                .position(_viewModel.selectedPOI.value!!.latLng)
-                .title(_viewModel.selectedPOI.value?.name)
+                .position(selectedPOI!!.latLng)
+                .title(selectedPOI?.name)
         )
 
         // Add Circle based on radius
         map.addCircle(
             CircleOptions()
-                .center(_viewModel.selectedPOI.value?.latLng)
-                .radius(_viewModel.geofenceRadius.value!!)
+                .center(selectedPOI?.latLng)
+                .radius(geofenceRadius)
                 .strokeColor(Color.argb(255, 0, 0, 255))
                 .fillColor(Color.argb(64, 0, 0, 255)).strokeWidth(2F)
         )
@@ -265,7 +282,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
 
     override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
         // An item was selected.
-        _viewModel.transitionType.value = parent.getItemAtPosition(pos).toString()
+        transitionType = parent.getItemAtPosition(pos).toString()
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {}

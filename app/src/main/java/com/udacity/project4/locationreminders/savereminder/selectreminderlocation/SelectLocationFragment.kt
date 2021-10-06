@@ -217,7 +217,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
                 seek: SeekBar,
                 progress: Int, fromUser: Boolean
             ) {
-                geofenceRadius = (((progress / 100.00) * maxCircleRadius).toFloat())
+                geofenceRadius = (((progress / 100.00) * MAX_CIRCLE_RADIUS).toFloat())
                 slider_amount.text =
                     getString(R.string.styled_meters_text, geofenceRadius.toInt())
                 updateMap()
@@ -286,7 +286,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {}
+
+    companion object {
+        val MAX_CIRCLE_RADIUS = 2000.00
+    }
 }
 
 private const val REQUEST_LOCATION_PERMISSION = 1
-private const val maxCircleRadius = 2000.00

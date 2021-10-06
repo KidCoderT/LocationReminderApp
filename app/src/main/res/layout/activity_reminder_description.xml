@@ -10,24 +10,146 @@
             type="com.udacity.project4.locationreminders.reminderslist.ReminderDataItem" />
     </data>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:orientation="vertical"
+        android:padding="16dp"
         tools:context=".locationreminders.ReminderDescriptionActivity">
-        <!--TODO: add the design of the reminder details-->
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Reminder Details"
-            android:textSize="@dimen/text_size_large"
-            app:layout_constraintBottom_toBottomOf="parent"
+        <fragment
+            android:id="@+id/google_map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@+id/reminder_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
+        <TextView
+            android:id="@+id/reminder_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="276dp"
+            android:text="@{reminderDataItem.title}"
+            android:textColor="#000000"
+            android:textSize="28sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.441"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="Friends Meet Up" />
+
+        <TextView
+            android:id="@+id/reminder_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="32dp"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:text="@{reminderDataItem.description}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/reminder_title"
+            tools:text="jfdssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssfjjjjjjjjjjjfffff" />
+
+        <TextView
+            android:id="@+id/reminder_location_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:textSize="15sp"
+            android:text="@{reminderDataItem.location}"
+            app:layout_constraintEnd_toStartOf="@+id/reminder_location_latlng"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/reminder_description"
+            tools:text="Bangalore Motel" />
+
+        <TextView
+            android:id="@+id/reminder_location_latlng"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/reminder_location_name"
+            app:layout_constraintTop_toTopOf="@+id/reminder_location_name"
+            tools:text="@string/lat_long_snippet" />
+
+        <TextView
+            android:id="@+id/geofence_radius_field_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Geofence Radius (Meters)"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/reminder_location_name" />
+
+        <SeekBar
+            android:id="@+id/geofence_radius_slider"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="8dp"
+            android:clickable="false"
+            android:enabled="false"
+            android:min="5"
+            android:thumbTint="#00FFFFFF"
+            app:layout_constraintEnd_toStartOf="@+id/slider_amount"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/geofence_radius_field_title" />
+
+        <TextView
+            android:id="@+id/slider_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:background="#006E64"
+            android:padding="3dp"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/geofence_radius_slider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/geofence_radius_slider"
+            tools:text="50m" />
+
+        <TextView
+            android:id="@+id/reminder_transition_type_field_heading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Transition type:"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toStartOf="@+id/reminder_transition_type_value"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/geofence_radius_slider" />
+
+        <TextView
+            android:id="@+id/reminder_transition_type_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:text="@{reminderDataItem.transitionType}"
+            app:layout_constraintBottom_toBottomOf="@+id/reminder_transition_type_field_heading"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/reminder_transition_type_field_heading"
+            app:layout_constraintTop_toTopOf="@+id/reminder_transition_type_field_heading"
+            tools:text="Enter" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

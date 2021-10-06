@@ -115,16 +115,8 @@ class SaveReminderFragment : BaseFragment() {
 
         if (locationPermissionsApproved(requireContext())) {
             geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
-                addOnSuccessListener {
-//                    Toast.makeText(context, "Your Geofence has been added successfully",
-//                        Toast.LENGTH_SHORT)
-//                        .show()
-                }
-                addOnFailureListener {
-//                    Toast.makeText(context, "Sorry but there was some error adding geofence",
-//                        Toast.LENGTH_SHORT)
-//                        .show()
-                }
+                addOnSuccessListener {}
+                addOnFailureListener {}
             }
         }
     }

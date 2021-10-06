@@ -16,7 +16,7 @@
     <string name="hybrid_map">Hybrid Map</string>
     <string name="satellite_map">Satellite Map</string>
     <string name="terrain_map">Terrain Map</string>
-    <string name="lat_long_snippet">Lat: %1$.5f, Long: %2$.5f</string>
+    <string name="lat_long_snippet">(%1$.5f, %2$.5f)</string>
     <string name="dropped_pin">Dropped Pin</string>
     <string name="poi">poi</string>
     <string name="location_required_error">Location services must be enabled to use the app</string>
@@ -42,4 +42,5 @@
     <string name="error_adding_geofence">Error Happened, Can\'t Add Geofence</string>
 
     <string name="styled_meters_text">%1$dm</string>
+    <string name="unknown_geofence_error">Unknown error: the Geofence service is not available now</string>
 </resources>

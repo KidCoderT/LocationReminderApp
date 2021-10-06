@@ -40,7 +40,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
     private var selectedPOI: PointOfInterest? = null
     private var updatedPOIName: String? = null
     private var transitionType: String = "Enter"
-    private var geofenceRadius: Double = 100.00
+    private var geofenceRadius: Float = 100.0F
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -217,7 +217,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
                 seek: SeekBar,
                 progress: Int, fromUser: Boolean
             ) {
-                geofenceRadius = ((progress / 100.00) * maxCircleRadius)
+                geofenceRadius = (((progress / 100.00) * maxCircleRadius).toFloat())
                 slider_amount.text =
                     getString(R.string.styled_meters_text, geofenceRadius.toInt())
                 updateMap()
@@ -272,7 +272,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
         map.addCircle(
             CircleOptions()
                 .center(selectedPOI?.latLng)
-                .radius(geofenceRadius)
+                .radius(geofenceRadius.toDouble())
                 .strokeColor(Color.argb(255, 0, 0, 255))
                 .fillColor(Color.argb(64, 0, 0, 255)).strokeWidth(2F)
         )

@@ -2,8 +2,10 @@ package com.udacity.project4.locationreminders.geofence
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.app.JobIntentService
 import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingEvent
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
@@ -22,7 +24,7 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
     companion object {
         private const val JOB_ID = 573
 
-        //        TODO: call this to start the JobIntentService to handle the geofencing transition events
+        // call this to start the JobIntentService to handle the geofencing transition events
         fun enqueueWork(context: Context, intent: Intent) {
             enqueueWork(
                 context,
@@ -33,18 +35,32 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
     }
 
     override fun onHandleWork(intent: Intent) {
-        //TODO: handle the geofencing transition events and
-        // send a notification to the user when he enters the geofence area
-        //TODO call @sendNotification
+        // handle the geofencing transition events
+        val geofencingEvent = GeofencingEvent.fromIntent(intent)
+
+        if (geofencingEvent.hasError()) {
+            Log.e("GeofenceTransJobIntSvc", "${geofencingEvent.errorCode}")
+            return
+        }
+
+        // Check transition type and based on that set geofence
+        if (when (intent.extras?.get("transitionType")) {
+                "Enter" -> (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER)
+                "Dwell" -> (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL)
+                else -> (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT)
+            }
+        ) {
+            sendNotification(geofencingEvent.triggeringGeofences)
+        }
     }
 
-    //TODO: get the request id of the current geofence
     private fun sendNotification(triggeringGeofences: List<Geofence>) {
-        val requestId = ""
+        // get the request id of the current geofence
+        val requestId = triggeringGeofences[0].requestId
 
-        //Get the local repository instance
+        // Get the local repository instance
         val remindersLocalRepository: RemindersLocalRepository by inject()
-//        Interaction to the repository has to be through a coroutine scope
+        // Interaction to the repository has to be through a coroutine scope
         CoroutineScope(coroutineContext).launch(SupervisorJob()) {
             //get the reminder with the request id
             val result = remindersLocalRepository.getReminder(requestId)
@@ -58,6 +74,8 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
                         reminderDTO.location,
                         reminderDTO.latitude,
                         reminderDTO.longitude,
+                        reminderDTO.geofenceRadius,
+                        reminderDTO.transitionType,
                         reminderDTO.id
                     )
                 )

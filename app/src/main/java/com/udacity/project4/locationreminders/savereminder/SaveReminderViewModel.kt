@@ -20,7 +20,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     val selectedPOI = MutableLiveData<PointOfInterest>()
     val latitude = MutableLiveData<Double>()
     val longitude = MutableLiveData<Double>()
-    val geofenceRadius = MutableLiveData<Double>(100.00)
+    val geofenceRadius = MutableLiveData<Float>(100.0F)
     val transitionType = MutableLiveData<String>("Enter")
 
     /**
@@ -33,7 +33,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
         selectedPOI.value = null
         latitude.value = null
         longitude.value = null
-        geofenceRadius.value = 100.00
+        geofenceRadius.value = 100.0F
         transitionType.value = "Enter"
     }
 
@@ -59,6 +59,8 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
                     reminderData.location,
                     reminderData.latitude,
                     reminderData.longitude,
+                    reminderData.geofenceRadius,
+                    reminderData.transitionType,
                     reminderData.id
                 )
             )
@@ -78,6 +80,10 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
         }
 
         if (reminderData.location.isNullOrEmpty()) {
+            showSnackBarInt.value = R.string.err_select_location
+            return false
+        }
+        if (reminderData.latitude == null) {
             showSnackBarInt.value = R.string.err_select_location
             return false
         }

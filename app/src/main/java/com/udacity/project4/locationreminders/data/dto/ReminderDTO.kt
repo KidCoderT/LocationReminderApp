@@ -23,5 +23,7 @@ data class ReminderDTO(
     @ColumnInfo(name = "location") var location: String?,
     @ColumnInfo(name = "latitude") var latitude: Double?,
     @ColumnInfo(name = "longitude") var longitude: Double?,
+    @ColumnInfo(name = "geofence_radius") var geofenceRadius: Float = 100F,
+    @ColumnInfo(name = "transition_type") var transitionType: String = "Enter",
     @PrimaryKey @ColumnInfo(name = "entry_id") val id: String = UUID.randomUUID().toString()
 )

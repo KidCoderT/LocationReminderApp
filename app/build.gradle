@@ -52,7 +52,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    api 'com.google.android.material:material:1.1.0-alpha06'
+    api 'com.google.android.material:material:1.5.0-alpha04'
 
     implementation platform('com.google.firebase:firebase-bom:28.4.0')
 
@@ -120,6 +120,7 @@ dependencies {
     androidTestImplementation "androidx.arch.core:core-testing:$archTestingVersion"
     androidTestImplementation "org.robolectric:annotations:$robolectricVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    testImplementation 'org.robolectric:robolectric:4.0'
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
     androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$espressoVersion"

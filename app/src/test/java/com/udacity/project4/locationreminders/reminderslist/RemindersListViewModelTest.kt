@@ -3,8 +3,10 @@ package com.udacity.project4.locationreminders.reminderslist
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.udacity.project4.getOrAwaitValue
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
+import com.udacity.project4.locationreminders.rule.MainCoroutineRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.Is.`is`
@@ -26,6 +28,9 @@ class RemindersListViewModelTest {
     @get:Rule
     var instantTaskRule = InstantTaskExecutorRule()
 
+    @get:Rule
+    val mainCoroutineRule = MainCoroutineRule()
+
     @Before
     fun setupTestViewModel() {
         fakeDataSource = FakeDataSource()
@@ -39,24 +44,6 @@ class RemindersListViewModelTest {
 
         // Then
         assertThat(remindersViewModel.showNoData.value, `is`(true))
-    }
-
-    @Test
-    suspend fun getShowNoData_hasReminder_returnsFalse() {
-        // Given
-        fakeDataSource.saveReminder(ReminderDTO(
-            "title",
-            "Description",
-            "location",
-            55.55,
-            45.55
-        ))
-
-        // When
-        remindersViewModel.loadReminders()
-
-        // Then
-        assertThat(remindersViewModel.showNoData.value, `is`(false))
     }
 
 }

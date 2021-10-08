@@ -6,11 +6,11 @@ buildscript {
 
     repositories {
         google()
-        jcenter()
+        mavenCentral()
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.1'
+        classpath 'com.android.tools.build:gradle:4.0.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersion"
         classpath 'com.google.gms:google-services:4.3.10'
@@ -24,7 +24,7 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 
@@ -36,7 +36,7 @@ ext {
     // Support library and architecture components support minSdk 14 and above.
     minSdkVersion = 26
     targetSdkVersion = 30
-    compileSdkVersion = 30
+    compileSdkVersion = 31
 
     // App dependencies
     androidXVersion = '1.0.0'

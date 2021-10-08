@@ -55,7 +55,7 @@ ext {
     roomVersion = '2.3.0'
     koinVersion = '2.0.1'
     truthVersion = '0.44'
-    junitVersion = '4.12'
+    junitVersion = '4.13.2'
     androidXTestCoreVersion = '1.2.0-beta01'
     robolectricVersion = '4.5.1'
     androidXTestExtKotlinRunnerVersion = '1.1.1'

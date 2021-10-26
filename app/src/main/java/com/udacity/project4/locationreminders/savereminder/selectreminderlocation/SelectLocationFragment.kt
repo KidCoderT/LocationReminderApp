@@ -31,8 +31,8 @@ import org.koin.android.ext.android.inject
 
 class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.OnItemSelectedListener {
 
-    //Use Koin to get the view model of the SaveReminder
     private lateinit var map: GoogleMap
+    //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient

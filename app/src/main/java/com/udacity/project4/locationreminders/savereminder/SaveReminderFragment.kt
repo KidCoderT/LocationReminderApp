@@ -72,10 +72,10 @@ class SaveReminderFragment : BaseFragment() {
             val newGeofenceReminder = ReminderDataItem(title, description, location, latitude, longitude, geofenceRadius!!, transitionType!!)
 
             // 1) save the reminder to the local db
-            _viewModel.validateAndSaveReminder(newGeofenceReminder)
-
-            // 2) create a geofencing request
-            createNewGeofenceRequest(newGeofenceReminder)
+            if (_viewModel.validateAndSaveReminder(newGeofenceReminder)) {
+                // 2) create a geofencing request
+                createNewGeofenceRequest(newGeofenceReminder)
+            }
         }
     }
 

@@ -71,8 +71,8 @@ class SaveReminderFragment : BaseFragment() {
             // use the user entered reminder details to:
             val newGeofenceReminder = ReminderDataItem(title, description, location, latitude, longitude, geofenceRadius!!, transitionType!!)
 
-            // 1) save the reminder to the local db
-            if (_viewModel.validateAndSaveReminder(newGeofenceReminder)) {
+            // 1) validate the reminder
+            if (_viewModel.validateEnteredData(newGeofenceReminder)) {
                 // 2) create a geofencing request
                 createNewGeofenceRequest(newGeofenceReminder)
             }
@@ -115,8 +115,13 @@ class SaveReminderFragment : BaseFragment() {
 
         if (locationPermissionsApproved(requireContext())) {
             geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
-                addOnSuccessListener {}
-                addOnFailureListener {}
+                addOnSuccessListener {
+                    _viewModel.showToast.postValue(getString(R.string.geofence_entered))
+                    _viewModel.validateAndSaveReminder(reminder)
+                }
+                addOnFailureListener {
+                    _viewModel.showToast.postValue(getString(R.string.error_adding_geofence))
+                }
             }
         }
     }

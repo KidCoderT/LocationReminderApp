@@ -44,6 +44,7 @@ class SaveReminderFragment : BaseFragment() {
             DataBindingUtil.inflate(inflater, R.layout.fragment_save_reminder, container, false)
 
         geofencingClient = LocationServices.getGeofencingClient(requireActivity() )
+        checkLocationPermissions()
 
         setDisplayHomeAsUpEnabled(true)
         binding.viewModel = _viewModel
@@ -105,8 +106,6 @@ class SaveReminderFragment : BaseFragment() {
             intent.putExtra("transitionType", reminder.transitionType)
             PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
-
-        checkLocationPermissions()
 
         val geofencingRequest = GeofencingRequest.Builder()
             .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)

@@ -61,8 +61,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-        onLocationSelected()
-
         return binding.root
     }
 

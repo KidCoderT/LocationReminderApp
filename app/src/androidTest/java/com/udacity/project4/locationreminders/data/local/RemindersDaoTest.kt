@@ -93,5 +93,4 @@ class RemindersDaoTest {
         // THAN
         assertThat(listOfReminders, `is`(emptyList()))
     }
-
 }

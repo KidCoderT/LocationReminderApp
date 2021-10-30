@@ -23,8 +23,10 @@
         <entry key="..\:/Users/tejas/Desktop/LocationReminderApp/app/src/main/res/layout/activity_reminder_description.xml" value="0.33152173913043476" />
         <entry key="..\:/Users/tejas/Desktop/LocationReminderApp/app/src/main/res/layout/activity_reminders.xml" value="0.33695652173913043" />
         <entry key="..\:/Users/tejas/Desktop/LocationReminderApp/app/src/main/res/layout/fragment_reminders.xml" value="0.33695652173913043" />
-        <entry key="..\:/Users/tejas/Desktop/LocationReminderApp/app/src/main/res/layout/fragment_select_location.xml" value="0.33695652173913043" />
+        <entry key="..\:/Users/tejas/Desktop/LocationReminderApp/app/src/main/res/layout/fragment_save_reminder.xml" value="0.15806159420289856" />
+        <entry key="..\:/Users/tejas/Desktop/LocationReminderApp/app/src/main/res/layout/fragment_select_location.xml" value="0.2" />
         <entry key="..\:/Users/tejas/Desktop/LocationReminderApp/app/src/main/res/layout/it_reminder.xml" value="0.33695652173913043" />
+        <entry key="..\:/Users/tejas/Desktop/LocationReminderApp/app/src/main/res/layout/layout_bottom_sheet.xml" value="0.1697061803444782" />
       </map>
     </option>
   </component>

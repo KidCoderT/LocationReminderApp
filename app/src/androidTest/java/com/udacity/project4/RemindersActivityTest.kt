@@ -143,11 +143,12 @@ class RemindersActivityTest :
         // Go to select location screen
         onView(withId(R.id.selectLocation)).perform(ViewActions.click())
         // Select Random Location
-        // note: it doesn't need to be specific as no notification test will be there
+        // note: it doesn't need to be specific as no notification test will be
+        // there and there is option to select a map not a poi
         onView(withId(R.id.google_map)).perform(ViewActions.click())
         Thread.sleep(1000)
-        // Check bottom sheet opened by checking whether bottom most item is shown
-        onView(withId(R.id.geofence_request_expiration_field_container)).check(matches(isDisplayed()))
+        // Check bottom sheet opened by checking whether title is shown
+        onView(withId(R.id.location_title_text)).check(matches(isDisplayed()))
         // Click the Select location fab button
         onView(withId(R.id.select_location_fab)).perform(ViewActions.click())
         // Save the reminder finally

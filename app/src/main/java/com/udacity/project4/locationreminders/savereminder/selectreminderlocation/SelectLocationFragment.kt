@@ -24,6 +24,7 @@ import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
+import com.udacity.project4.utils.round
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import kotlinx.android.synthetic.main.fragment_select_location.*
 import kotlinx.android.synthetic.main.layout_bottom_sheet.*
@@ -41,6 +42,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
     private var updatedPOIName: String? = null
     private var transitionType: String = "Enter"
     private var geofenceRadius: Float = 100.0F
+    private var selectedMapLatLng: LatLng? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -71,8 +73,14 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
 
         // 1. Set data in viewModel
         _viewModel.selectedPOI.value = selectedPOI
-        _viewModel.latitude.value = selectedPOI?.latLng?.latitude
-        _viewModel.longitude.value = selectedPOI?.latLng?.longitude
+        _viewModel.selectedMapLatLng.value = selectedMapLatLng
+        if (selectedPOI != null) {
+            _viewModel.latitude.value = selectedPOI?.latLng?.latitude
+            _viewModel.longitude.value = selectedPOI?.latLng?.longitude
+        } else {
+            _viewModel.latitude.value = selectedMapLatLng?.latitude
+            _viewModel.longitude.value = selectedMapLatLng?.longitude
+        }
         _viewModel.reminderSelectedLocationStr.value = updatedPOIName
         _viewModel.transitionType.value = transitionType
         _viewModel.geofenceRadius.value = geofenceRadius
@@ -177,6 +185,35 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             location_title_text.text = updatedPOIName
         }
+
+        // put a marker to location that the user selected
+        map.setOnMapClickListener { pos ->
+
+            // Set the new Data
+            selectedPOI = null
+            updatedPOIName = "(${pos.latitude.round(3)}, ${pos.longitude.round(3)})"
+            selectedMapLatLng = pos
+
+            // Move camera to the selected location
+            map.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    pos, 14F
+                )
+            )
+
+            // Method for extra stuff
+            updateMap()
+
+            // hide the reminder text
+            binding.reminderText.visibility = View.GONE
+
+            // Show the select this location fab button
+            select_location_fab.show()
+
+            // show Bottom Drawer
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            location_title_text.text = updatedPOIName
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -260,22 +297,41 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
     private fun updateMap() {
         map.clear()
 
-        val poiMarker = map.addMarker(
-            MarkerOptions()
-                .position(selectedPOI!!.latLng)
-                .title(selectedPOI?.name)
-        )
+        if (selectedPOI != null) {
+            val poiMarker = map.addMarker(
+                MarkerOptions()
+                    .position(selectedPOI!!.latLng)
+                    .title(selectedPOI?.name)
+            )
 
-        // Add Circle based on radius
-        map.addCircle(
-            CircleOptions()
-                .center(selectedPOI?.latLng)
-                .radius(geofenceRadius.toDouble())
-                .strokeColor(Color.argb(255, 0, 0, 255))
-                .fillColor(Color.argb(64, 0, 0, 255)).strokeWidth(2F)
-        )
+            // Add Circle based on radius
+            map.addCircle(
+                CircleOptions()
+                    .center(selectedPOI?.latLng)
+                    .radius(geofenceRadius.toDouble())
+                    .strokeColor(Color.argb(255, 0, 0, 255))
+                    .fillColor(Color.argb(64, 0, 0, 255)).strokeWidth(2F)
+            )
 
-        poiMarker.showInfoWindow()
+            poiMarker.showInfoWindow()
+        } else {
+            val poiMarker = map.addMarker(
+                MarkerOptions()
+                    .position(selectedMapLatLng!!)
+                    .title(updatedPOIName)
+            )
+
+            // Add Circle based on radius
+            map.addCircle(
+                CircleOptions()
+                    .center(selectedMapLatLng!!)
+                    .radius(geofenceRadius.toDouble())
+                    .strokeColor(Color.argb(255, 0, 0, 255))
+                    .fillColor(Color.argb(64, 0, 0, 255)).strokeWidth(2F)
+            )
+
+            poiMarker.showInfoWindow()
+        }
     }
 
     override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {

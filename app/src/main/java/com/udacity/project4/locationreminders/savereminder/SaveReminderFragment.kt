@@ -73,8 +73,15 @@ class SaveReminderFragment : BaseFragment() {
             val geofenceRadius = _viewModel.geofenceRadius.value
             val transitionType = if (_viewModel.transitionType.value != null) _viewModel.transitionType.value else "Enter"
 
+
             // use the user entered reminder details to:
-            newReminder = ReminderDataItem(title, description, location, latitude, longitude, geofenceRadius!!, transitionType!!)
+            newReminder = ReminderDataItem(
+                title,
+                description,
+                location,
+                latitude,
+                longitude,
+                geofenceRadius!!, transitionType!!)
 
             // 1) validate the reminder
             if (_viewModel.validateEnteredData(newReminder)) {

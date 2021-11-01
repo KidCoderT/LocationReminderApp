@@ -1,6 +1,5 @@
 package com.udacity.project4
 
-import android.app.Activity
 import android.app.Application
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
@@ -8,11 +7,15 @@ import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.withDecorView
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withText
+import org.hamcrest.Matchers.`is`
+import org.hamcrest.Matchers.not
+
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.udacity.project4.locationreminders.RemindersActivity
@@ -133,6 +136,11 @@ class RemindersActivityTest :
         onView(withId(R.id.noDataTextView)).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
         // Go the save reminder Screen
         onView(withId(R.id.addReminderFAB)).perform(ViewActions.click())
+        // Test I cant just save Reminder Without filling form
+        // by clicking fab button and checking for snack bar message
+        onView(withId(R.id.saveReminder)).perform(ViewActions.click())
+        onView(withId(com.google.android.material.R.id.snackbar_text))
+            .check(matches(withText(R.string.err_enter_title)))
         // fill in form text
         onView(withId(R.id.reminderTitle))
             .perform(ViewActions.typeText(reminder.title))
@@ -140,19 +148,46 @@ class RemindersActivityTest :
             .perform(ViewActions.typeText(reminder.description))
         // Close keyboard because blocking view
         Espresso.closeSoftKeyboard()
+        // Test I cant just save Reminder Without filling in the location
+        // by clicking fab button and checking for snack bar message
+        onView(withId(R.id.saveReminder)).perform(ViewActions.click())
+        onView(withId(com.google.android.material.R.id.snackbar_text))
+            .check(matches(withText(R.string.err_select_location)))
         // Go to select location screen
         onView(withId(R.id.selectLocation)).perform(ViewActions.click())
+        // Wait a sec for the map to load
+        Thread.sleep(3000)
         // Select Random Location
         // note: it doesn't need to be specific as no notification test will be
         // there and there is option to select a map not a poi
+        // also I am clicking two times just in case it doesn't work the first time
         onView(withId(R.id.google_map)).perform(ViewActions.click())
-        Thread.sleep(1000)
+        onView(withId(R.id.google_map)).perform(ViewActions.click())
         // Check bottom sheet opened by checking whether title is shown
         onView(withId(R.id.location_title_text)).check(matches(isDisplayed()))
         // Click the Select location fab button
         onView(withId(R.id.select_location_fab)).perform(ViewActions.click())
         // Save the reminder finally
         onView(withId(R.id.saveReminder)).perform(ViewActions.click())
+        // Check That toast message came saying reminder saved
+        val toastMessage = appContext.getString(R.string.reminder_saved)
+        var remindersActivity: RemindersActivity? = null
+        scenario.onActivity { activity ->
+            remindersActivity = activity
+        }
+        onView(withText(toastMessage)).inRoot(
+            withDecorView(
+                not(
+                    `is`(
+                        remindersActivity?.window?.decorView
+                    )
+                )
+            )
+        ).check(
+            matches(
+                isDisplayed()
+            )
+        )
         // Check on Reminder List scree whether no Data is gone and new Reminder is shown
         onView(withId(R.id.noDataTextView)).check(matches(withEffectiveVisibility(Visibility.GONE)))
         onView(withText(reminder.title))

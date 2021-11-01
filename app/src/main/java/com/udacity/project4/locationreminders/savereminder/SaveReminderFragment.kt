@@ -114,7 +114,7 @@ class SaveReminderFragment : BaseFragment() {
                 "Dwell" -> Geofence.GEOFENCE_TRANSITION_DWELL
                 else -> Geofence.GEOFENCE_TRANSITION_EXIT
             })
-            .setLoiteringDelay(1000)
+            .setLoiteringDelay(500)
             .setExpirationDuration(Geofence.NEVER_EXPIRE)
             .build()
 

@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.udacity.project4.getOrAwaitValue
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.rule.MainCoroutineRule
@@ -12,7 +11,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.Is.`is`
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -26,7 +24,7 @@ import org.robolectric.annotation.Config
 class RemindersListViewModelTest {
 
     private lateinit var fakeDataSource: FakeDataSource
-    private lateinit var remindersViewModel: RemindersListViewModel
+    private lateinit var remindersListViewModel: RemindersListViewModel
 
     @get:Rule
     var instantTaskRule = InstantTaskExecutorRule()
@@ -38,16 +36,16 @@ class RemindersListViewModelTest {
     fun setupTestViewModel() {
         stopKoin()
         fakeDataSource = FakeDataSource()
-        remindersViewModel = RemindersListViewModel( ApplicationProvider.getApplicationContext(), fakeDataSource)
+        remindersListViewModel = RemindersListViewModel( ApplicationProvider.getApplicationContext(), fakeDataSource)
     }
 
     @Test
     fun checkShowNoData_returnsTrue_onNoReminders() {
         // When
-        remindersViewModel.loadReminders()
+        remindersListViewModel.loadReminders()
 
         // Then
-        assertThat(remindersViewModel.showNoData.value, `is`(true))
+        assertThat(remindersListViewModel.showNoData.value, `is`(true))
     }
 
     @Test
@@ -62,26 +60,34 @@ class RemindersListViewModelTest {
         ))
 
         // When
-        remindersViewModel.loadReminders()
+        remindersListViewModel.loadReminders()
 
         // Then
-        assertThat(remindersViewModel.showNoData.value, `is`(false))
+        assertThat(remindersListViewModel.showNoData.value, `is`(false))
     }
 
     @Test
-    fun checkShowLoadingValue_returnsTrueFalse_onloadReminderRunningAndCompleted() {
+    fun checkShowLoadingValue_returnsTrueFalse_onLoadReminderRunningAndCompleted() {
         // When
         mainCoroutineRule.pauseDispatcher() // Pause coroutines
-        remindersViewModel.loadReminders()
+        remindersListViewModel.loadReminders()
 
         // Then
-        assertThat(remindersViewModel.showLoading.value, `is`(true))
+        assertThat(remindersListViewModel.showLoading.value, `is`(true))
 
         // When
         mainCoroutineRule.resumeDispatcher()
 
         // Then
-        assertThat(remindersViewModel.showLoading.value, `is`(false))
+        assertThat(remindersListViewModel.showLoading.value, `is`(false))
+    }
+
+    @Test
+    fun onLoadReminders_showErrorMessage() {
+        fakeDataSource.setReturnError(true)
+        remindersListViewModel.loadReminders()
+
+        assertThat(remindersListViewModel.showSnackBar.value, `is`("Could not find reminder"))
     }
 
 }

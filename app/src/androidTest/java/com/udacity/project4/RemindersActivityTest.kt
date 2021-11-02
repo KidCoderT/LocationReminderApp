@@ -160,11 +160,6 @@ class RemindersActivityTest :
         // Select Random Location
         // note: it doesn't need to be specific as no notification test will be
         // there and there is option to select a map not a poi
-        // also I am clicking 5 times just in case it doesn't work the first 4 times
-        onView(withId(R.id.google_map)).perform(ViewActions.click())
-        onView(withId(R.id.google_map)).perform(ViewActions.click())
-        onView(withId(R.id.google_map)).perform(ViewActions.click())
-        onView(withId(R.id.google_map)).perform(ViewActions.click())
         onView(withId(R.id.google_map)).perform(ViewActions.click())
         // Check bottom sheet opened by checking whether title is shown
         onView(withId(R.id.location_title_text)).check(matches(isDisplayed()))

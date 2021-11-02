@@ -152,4 +152,7 @@ dependencies {
     implementation "com.google.android.gms:play-services-maps:$playServicesVersion"
 
     implementation 'com.android.support:multidex:1.0.3'
+
+    // Easy Permissions
+    implementation 'com.vmadalin:easypermissions-ktx:1.0.0'
 }

@@ -11,11 +11,8 @@ import android.os.Bundle
 import android.view.*
 import android.view.animation.LinearInterpolator
 import android.widget.*
-import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -42,13 +39,13 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
     private lateinit var binding: FragmentSelectLocationBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+    private lateinit var mapFragment : SupportMapFragment
+    private var permissionGranted = false
     private var selectedPOI: PointOfInterest? = null
     private var updatedPOIName: String? = null
     private var transitionType: String = "Enter"
     private var geofenceRadius: Float = 100.0F
     private var selectedMapLatLng: LatLng? = null
-    private val FINE_LOCATION_ACCESS_REQUEST_CODE = 10001
-    private val BACKGROUND_LOCATION_ACCESS_REQUEST_CODE = 10002
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -62,12 +59,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
 
-        // the map setup implementation
-        val mapFragment = childFragmentManager
-            .findFragmentById(R.id.google_map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        checkLocationPermissionAndSetupMapFragment()
 
         return binding.root
     }
@@ -120,11 +113,35 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
         else -> super.onOptionsItemSelected(item)
     }
 
+    private fun checkLocationPermissionAndSetupMapFragment() {
+        if (ActivityCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // map only shows if permission granted
+            permissionGranted = true
+            mapFragment = childFragmentManager.findFragmentById(R.id.google_map) as SupportMapFragment
+            mapFragment.getMapAsync(this)
+        } else {
+            requestPermissions(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                REQUEST_LOCATION_PERMISSION
+            )
+        }
+    }
+
     @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
-        enableUserLocation()
+        // Shows my location only if the permission is granted
+        map.isMyLocationEnabled = permissionGranted
+
+        // added style to the map
+        map.setMapStyle(
+            MapStyleOptions.loadRawResourceStyle(
+                requireContext(),
+                R.raw.map_style
+            )
+        )
 
         // zoom to the user location after taking his permission
         fusedLocationClient.lastLocation
@@ -138,14 +155,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
                     )
                 )
             }
-
-        // added style to the map
-        map.setMapStyle(
-            MapStyleOptions.loadRawResourceStyle(
-                requireContext(),
-                R.raw.map_style
-            )
-        )
 
         // put a marker to location that the user selected
         map.setOnPoiClickListener { poi ->
@@ -327,71 +336,26 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
         }
     }
 
+    @SuppressLint("MissingPermission")
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                permissionGranted = true
+            }else {
+                _viewModel.showErrorMessage.postValue(getString(R.string.permission_denied_explanation))
+            }
+            mapFragment = childFragmentManager.findFragmentById(R.id.google_map) as SupportMapFragment
+            mapFragment.getMapAsync(this)
+        }
+    }
+
     override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
         // An item was selected.
         transitionType = parent.getItemAtPosition(pos).toString()
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {}
-
-    private fun enableUserLocation() {
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            map.isMyLocationEnabled = true
-        } else {
-            //Ask for permission
-            if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    requireActivity(),
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-            ) {
-                //We need to show user a dialog for displaying why the permission is needed and then ask for the permission...
-                _viewModel.showSnackBar.value = "We need locations to be allowed so that we may remind you when you reach the location you selected."
-            } else {
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    FINE_LOCATION_ACCESS_REQUEST_CODE
-                )
-            }
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode == FINE_LOCATION_ACCESS_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //We have the permission
-                map.isMyLocationEnabled = true
-            } else {
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    FINE_LOCATION_ACCESS_REQUEST_CODE
-                )
-            }
-        }
-        if (requestCode == BACKGROUND_LOCATION_ACCESS_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //We have the permission
-                Toast.makeText(requireContext(), "You can add select location for geofence", Toast.LENGTH_SHORT).show()
-            } else {
-                //We do not have the permission..
-                Toast.makeText(
-                    requireContext(),
-                    "Background location access is necessary for geofence to trigger.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
 
     companion object {
         val MAX_CIRCLE_RADIUS = 2000.00

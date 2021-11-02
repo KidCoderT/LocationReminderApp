@@ -34,6 +34,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.google.android.gms.location.GeofencingClient
 
 import com.google.android.gms.maps.GoogleMap
@@ -57,7 +58,6 @@ class SaveReminderFragment : BaseFragment() {
             DataBindingUtil.inflate(inflater, R.layout.fragment_save_reminder, container, false)
 
         geofencingClient = LocationServices.getGeofencingClient(requireActivity())
-        requestForegroundAndBackgroundLocationPermissions()
 
         setDisplayHomeAsUpEnabled(true)
         binding.viewModel = _viewModel
@@ -170,11 +170,9 @@ class SaveReminderFragment : BaseFragment() {
                 try {
                     exception.startResolutionForResult(requireActivity(),
                         REQUEST_TURN_DEVICE_LOCATION_ON)
-                } catch (error: IntentSender.SendIntentException) {
-                    _viewModel.showSnackBar.value = "Error getting location settings: ${error.message}"
+                } catch (sendEx: IntentSender.SendIntentException) {
                 }
             } else {
-                _viewModel.showSnackBar.postValue(getString(R.string.location_required_error))
                 Snackbar.make(
                     requireView(),
                     R.string.location_required_error, Snackbar.LENGTH_INDEFINITE
@@ -255,7 +253,6 @@ class SaveReminderFragment : BaseFragment() {
             checkDeviceLocationSettingsAndStartGeofence()
         }
     }
-
 
     companion object {
         internal const val ACTION_GEOFENCE_EVENT =

@@ -120,10 +120,24 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
         else -> super.onOptionsItemSelected(item)
     }
 
+    @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
         enableUserLocation()
+
+        // zoom to the user location after taking his permission
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                map.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(
+                            location!!.latitude,
+                            location.longitude
+                        ), 14F
+                    )
+                )
+            }
 
         // added style to the map
         map.setMapStyle(
@@ -326,20 +340,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            map.setMyLocationEnabled(true)
-
-            // zoom to the user location after taking his permission
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location: Location? ->
-                    map.moveCamera(
-                        CameraUpdateFactory.newLatLngZoom(
-                            LatLng(
-                                location!!.latitude,
-                                location.longitude
-                            ), 14F
-                        )
-                    )
-                }
+            map.isMyLocationEnabled = true
         } else {
             //Ask for permission
             if (ActivityCompat.shouldShowRequestPermissionRationale(
@@ -348,11 +349,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
                 )
             ) {
                 //We need to show user a dialog for displaying why the permission is needed and then ask for the permission...
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    FINE_LOCATION_ACCESS_REQUEST_CODE
-                )
+                _viewModel.showSnackBar.value = "We need locations to be allowed so that we may remind you when you reach the location you selected."
             } else {
                 ActivityCompat.requestPermissions(
                     requireActivity(),
@@ -373,21 +370,12 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //We have the permission
                 map.isMyLocationEnabled = true
-
-                // zoom to the user location after taking his permission
-                fusedLocationClient.lastLocation
-                    .addOnSuccessListener { location: Location? ->
-                        map.moveCamera(
-                            CameraUpdateFactory.newLatLngZoom(
-                                LatLng(
-                                    location!!.latitude,
-                                    location.longitude
-                                ), 14F
-                            )
-                        )
-                    }
             } else {
-                //We do not have the permission..
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    FINE_LOCATION_ACCESS_REQUEST_CODE
+                )
             }
         }
         if (requestCode == BACKGROUND_LOCATION_ACCESS_REQUEST_CODE) {

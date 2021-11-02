@@ -3,6 +3,7 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.Manifest
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
@@ -10,8 +11,11 @@ import android.os.Bundle
 import android.view.*
 import android.view.animation.LinearInterpolator
 import android.widget.*
+import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -43,6 +47,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
     private var transitionType: String = "Enter"
     private var geofenceRadius: Float = 100.0F
     private var selectedMapLatLng: LatLng? = null
+    private val FINE_LOCATION_ACCESS_REQUEST_CODE = 10001
+    private val BACKGROUND_LOCATION_ACCESS_REQUEST_CODE = 10002
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -117,34 +123,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_LOCATION_PERMISSION
-            )
-        }
-        map.isMyLocationEnabled = true
-
-        // zoom to the user location after taking his permission
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                map.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        LatLng(
-                            location!!.latitude,
-                            location.longitude
-                        ), 14F
-                    )
-                )
-            }
+        enableUserLocation()
 
         // added style to the map
         map.setMapStyle(
@@ -340,6 +319,91 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
     }
 
     override fun onNothingSelected(parent: AdapterView<*>) {}
+
+    private fun enableUserLocation() {
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            map.setMyLocationEnabled(true)
+
+            // zoom to the user location after taking his permission
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    map.moveCamera(
+                        CameraUpdateFactory.newLatLngZoom(
+                            LatLng(
+                                location!!.latitude,
+                                location.longitude
+                            ), 14F
+                        )
+                    )
+                }
+        } else {
+            //Ask for permission
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+            ) {
+                //We need to show user a dialog for displaying why the permission is needed and then ask for the permission...
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    FINE_LOCATION_ACCESS_REQUEST_CODE
+                )
+            } else {
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    FINE_LOCATION_ACCESS_REQUEST_CODE
+                )
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == FINE_LOCATION_ACCESS_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //We have the permission
+                map.isMyLocationEnabled = true
+
+                // zoom to the user location after taking his permission
+                fusedLocationClient.lastLocation
+                    .addOnSuccessListener { location: Location? ->
+                        map.moveCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(
+                                    location!!.latitude,
+                                    location.longitude
+                                ), 14F
+                            )
+                        )
+                    }
+            } else {
+                //We do not have the permission..
+            }
+        }
+        if (requestCode == BACKGROUND_LOCATION_ACCESS_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //We have the permission
+                Toast.makeText(requireContext(), "You can add select location for geofence", Toast.LENGTH_SHORT).show()
+            } else {
+                //We do not have the permission..
+                Toast.makeText(
+                    requireContext(),
+                    "Background location access is necessary for geofence to trigger.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
 
     companion object {
         val MAX_CIRCLE_RADIUS = 2000.00

@@ -7,6 +7,8 @@ import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.pressBack
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -89,15 +91,15 @@ class RemindersActivityTest :
     }
 
     @Before
-    fun registerIdlingResource(): Unit = IdlingRegistry.getInstance().run {
-        register(EspressoIdlingResource.countingIdlingResource)
-        register(dataBindingIdlingResource)
+    fun registerIdlingResource() {
+        IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
+        IdlingRegistry.getInstance().register(dataBindingIdlingResource)
     }
 
     @After
-    fun unregisterIdlingResource(): Unit = IdlingRegistry.getInstance().run {
-        unregister(EspressoIdlingResource.countingIdlingResource)
-        unregister(dataBindingIdlingResource)
+    fun unregisterIdlingResource() {
+        IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
+        IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
     }
 
     @Test
@@ -112,7 +114,6 @@ class RemindersActivityTest :
         }
 
         val scenario = ActivityScenario.launch(RemindersActivity::class.java)
-
         dataBindingIdlingResource.monitorActivity(scenario)
 
         onView(withText(reminder.title))
@@ -135,10 +136,10 @@ class RemindersActivityTest :
         // Check There are no Reminders
         onView(withId(R.id.noDataTextView)).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
         // Go the save reminder Screen
-        onView(withId(R.id.addReminderFAB)).perform(ViewActions.click())
+        onView(withId(R.id.addReminderFAB)).perform(click())
         // Test I cant just save Reminder Without filling form
         // by clicking fab button and checking for snack bar message
-        onView(withId(R.id.saveReminder)).perform(ViewActions.click())
+        onView(withId(R.id.saveReminder)).perform(click())
         onView(withId(com.google.android.material.R.id.snackbar_text))
             .check(matches(withText(R.string.err_enter_title)))
         // fill in form text
@@ -150,25 +151,25 @@ class RemindersActivityTest :
         Espresso.closeSoftKeyboard()
         // Test I cant just save Reminder Without filling in the location
         // by clicking fab button and checking for snack bar message
-        onView(withId(R.id.saveReminder)).perform(ViewActions.click())
+        onView(withId(R.id.saveReminder)).perform(click())
         onView(withId(com.google.android.material.R.id.snackbar_text))
             .check(matches(withText(R.string.err_select_location)))
         // Go to select location screen
-        onView(withId(R.id.selectLocation)).perform(ViewActions.click())
+        onView(withId(R.id.selectLocation)).perform(click())
         // Wait a sec for the map to load
         Thread.sleep(3000)
         // Select Random Location
         // note: it doesn't need to be specific as no notification test will be
         // there and there is option to select a map not a poi
-        onView(withId(R.id.google_map)).perform(ViewActions.click())
+        onView(withId(R.id.google_map)).perform(click(pressBack()))
         // Wait a sec map to load
         Thread.sleep(3000)
         // Check bottom sheet opened by checking whether title is shown
         onView(withId(R.id.location_title_text)).check(matches(isDisplayed()))
         // Click the Select location fab button
-        onView(withId(R.id.select_location_fab)).perform(ViewActions.click())
+        onView(withId(R.id.select_location_fab)).perform(click())
         // Save the reminder finally
-        onView(withId(R.id.saveReminder)).perform(ViewActions.click())
+        onView(withId(R.id.saveReminder)).perform(click())
         // Check That toast message came saying reminder saved
         val toastMessage = appContext.getString(R.string.reminder_saved)
         var remindersActivity: RemindersActivity? = null

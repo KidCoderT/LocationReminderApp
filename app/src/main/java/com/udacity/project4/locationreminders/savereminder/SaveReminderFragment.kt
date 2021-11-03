@@ -53,6 +53,13 @@ class SaveReminderFragment : BaseFragment() {
     private val runningQOrLater = android.os.Build.VERSION.SDK_INT >=
             android.os.Build.VERSION_CODES.Q
     private lateinit var newReminder: ReminderDataItem
+    var activity: Activity? = null
+
+
+    override fun onAttach(activity: Activity) {
+        super.onAttach(activity)
+        this.activity = activity
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -131,11 +138,11 @@ class SaveReminderFragment : BaseFragment() {
 
         // Create pending intent
         val geofencePendingIntent: PendingIntent by lazy {
-            val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
+            val intent = Intent(activity, GeofenceBroadcastReceiver::class.java)
             intent.action = ACTION_GEOFENCE_EVENT
             intent.putExtra("transitionType", newReminder.transitionType)
             PendingIntent.getBroadcast(
-                requireContext(),
+                activity,
                 0,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT

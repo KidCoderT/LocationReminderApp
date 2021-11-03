@@ -41,6 +41,9 @@ android {
         includeAndroidResources = true
         returnDefaultValues = true
     }
+    testOptions {
+        animationsDisabled = true
+    }
 
     //dataBinding {
     //    enabled = true

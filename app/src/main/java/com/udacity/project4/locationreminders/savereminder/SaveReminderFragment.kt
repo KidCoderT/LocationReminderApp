@@ -182,16 +182,10 @@ class SaveReminderFragment : BaseFragment() {
         locationSettingsResponseTask.addOnFailureListener { exception ->
             if (exception is ResolvableApiException && resolve) {
                 try {
-                    val resultLauncher = registerForActivityResult(
-                        ActivityResultContracts.StartIntentSenderForResult()
-                    ) { result ->
-                        if (result.resultCode == RESULT_OK) {
-                            createNewGeofenceRequest()
-                        }
-                    }
-                    val intentSenderRequest =
-                        IntentSenderRequest.Builder(exception.resolution).build()
-                    resultLauncher.launch(intentSenderRequest)
+                    exception.startResolutionForResult(
+                        requireActivity(),
+                        REQUEST_TURN_DEVICE_LOCATION_ON
+                    )
                 } catch (sendEx: IntentSender.SendIntentException) {
                 }
             } else {
@@ -249,7 +243,7 @@ class SaveReminderFragment : BaseFragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
-            createNewGeofenceRequest()
+            checkDeviceLocationSettingsAndStartGeofence()
         }
     }
 
@@ -278,7 +272,7 @@ class SaveReminderFragment : BaseFragment() {
                     })
                 }.show()
         } else {
-            createNewGeofenceRequest()
+            checkDeviceLocationSettingsAndStartGeofence()
         }
     }
 

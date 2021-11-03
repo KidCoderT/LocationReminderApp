@@ -143,19 +143,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
             )
         )
 
-        // zoom to the user location after taking his permission
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                map.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        LatLng(
-                            location!!.latitude,
-                            location.longitude
-                        ), 14F
-                    )
-                )
-            }
-
         // put a marker to location that the user selected
         map.setOnPoiClickListener { poi ->
 
@@ -215,6 +202,21 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
             // show Bottom Drawer
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             location_title_text.text = updatedPOIName
+        }
+
+        if (permissionGranted) {
+            // zoom to the user location after taking his permission
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    map.moveCamera(
+                        CameraUpdateFactory.newLatLngZoom(
+                            LatLng(
+                                location!!.latitude,
+                                location.longitude
+                            ), 14F
+                        )
+                    )
+                }
         }
     }
 
@@ -342,6 +344,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
             if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 permissionGranted = true
+                map.isMyLocationEnabled = true
             }else {
                 _viewModel.showErrorMessage.postValue(getString(R.string.permission_denied_explanation))
             }

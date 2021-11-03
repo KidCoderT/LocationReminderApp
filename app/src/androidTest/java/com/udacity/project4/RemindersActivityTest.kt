@@ -161,6 +161,8 @@ class RemindersActivityTest :
         // note: it doesn't need to be specific as no notification test will be
         // there and there is option to select a map not a poi
         onView(withId(R.id.google_map)).perform(ViewActions.click())
+        // Wait a sec map to load
+        Thread.sleep(3000)
         // Check bottom sheet opened by checking whether title is shown
         onView(withId(R.id.location_title_text)).check(matches(isDisplayed()))
         // Click the Select location fab button

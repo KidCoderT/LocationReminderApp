@@ -100,6 +100,8 @@ class SaveReminderFragment : BaseFragment() {
 
             // 1) validate the reminder
             if (_viewModel.validateEnteredData(newReminder)) {
+                // 2) Save Reminder
+                _viewModel.validateAndSaveReminder(newReminder)
                 // 2) check permissions and create geofence request
                 checkPermissionsAndStartGeofencing()
             }
@@ -148,7 +150,6 @@ class SaveReminderFragment : BaseFragment() {
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
             addOnSuccessListener {
                 _viewModel.showToast.postValue(getString(R.string.geofence_entered))
-                _viewModel.validateAndSaveReminder(newReminder)
             }
             addOnFailureListener {
                 _viewModel.showToast.postValue(getString(R.string.error_adding_geofence))
@@ -248,7 +249,7 @@ class SaveReminderFragment : BaseFragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
-            checkDeviceLocationSettingsAndStartGeofence()
+            createNewGeofenceRequest()
         }
     }
 
@@ -277,7 +278,7 @@ class SaveReminderFragment : BaseFragment() {
                     })
                 }.show()
         } else {
-            checkDeviceLocationSettingsAndStartGeofence()
+            createNewGeofenceRequest()
         }
     }
 

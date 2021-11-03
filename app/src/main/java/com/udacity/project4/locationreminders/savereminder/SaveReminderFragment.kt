@@ -149,10 +149,10 @@ class SaveReminderFragment : BaseFragment() {
 
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
             addOnSuccessListener {
-                _viewModel.showToast.postValue(getString(R.string.geofence_entered))
+                _viewModel.showToast.postValue(context?.getString(R.string.geofence_entered))
             }
             addOnFailureListener {
-                _viewModel.showToast.postValue(getString(R.string.error_adding_geofence))
+                _viewModel.showToast.postValue(context?.getString(R.string.error_adding_geofence))
             }
         }
     }
@@ -182,11 +182,16 @@ class SaveReminderFragment : BaseFragment() {
         locationSettingsResponseTask.addOnFailureListener { exception ->
             if (exception is ResolvableApiException && resolve) {
                 try {
-                    exception.startResolutionForResult(
-                        requireActivity(),
-                        REQUEST_TURN_DEVICE_LOCATION_ON
+                    startIntentSenderForResult( exception.resolution.intentSender,
+                                REQUEST_TURN_DEVICE_LOCATION_ON,
+                        null,
+                        0,
+                        0,
+                        0,
+                        null
                     )
                 } catch (sendEx: IntentSender.SendIntentException) {
+                    Log.d(TAG, "Error getting location settings resolution: " + sendEx.message)
                 }
             } else {
                 Snackbar.make(

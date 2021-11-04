@@ -107,8 +107,6 @@ class SaveReminderFragment : BaseFragment() {
 
             // 1) validate the reminder
             if (_viewModel.validateEnteredData(newReminder)) {
-                // 2) Save Reminder
-                _viewModel.validateAndSaveReminder(newReminder)
                 // 2) check permissions and create geofence request
                 checkPermissionsAndStartGeofencing()
             }
@@ -157,9 +155,10 @@ class SaveReminderFragment : BaseFragment() {
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
             addOnSuccessListener {
                 _viewModel.showToast.postValue(context?.getString(R.string.geofence_entered))
+                _viewModel.validateAndSaveReminder(newReminder)
             }
             addOnFailureListener {
-                _viewModel.showToast.postValue(context?.getString(R.string.error_adding_geofence))
+                _viewModel.showToast.postValue("Failed to add location!!! Try again later!")
             }
         }
     }

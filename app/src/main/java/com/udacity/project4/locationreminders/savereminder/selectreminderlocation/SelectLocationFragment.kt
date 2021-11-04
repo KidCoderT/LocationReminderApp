@@ -31,15 +31,17 @@ import kotlinx.android.synthetic.main.fragment_select_location.*
 import kotlinx.android.synthetic.main.layout_bottom_sheet.*
 import org.koin.android.ext.android.inject
 
-class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.OnItemSelectedListener {
+class SelectLocationFragment : BaseFragment(), OnMapReadyCallback,
+    AdapterView.OnItemSelectedListener {
 
     private lateinit var map: GoogleMap
+
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
-    private lateinit var mapFragment : SupportMapFragment
+    private lateinit var mapFragment: SupportMapFragment
     private var permissionGranted = false
     private var selectedPOI: PointOfInterest? = null
     private var updatedPOIName: String? = null
@@ -113,15 +115,18 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
         else -> super.onOptionsItemSelected(item)
     }
 
-    private fun isPermissionGranted() : Boolean {
-        return ActivityCompat.checkSelfPermission(requireContext(),
-            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    private fun isPermissionGranted(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun checkPermissionsAndSetupMap() {
         if (isPermissionGranted()) {
             permissionGranted = true
-            mapFragment = childFragmentManager.findFragmentById(R.id.google_map) as SupportMapFragment
+            mapFragment =
+                childFragmentManager.findFragmentById(R.id.google_map) as SupportMapFragment
             mapFragment.getMapAsync(this)
         } else {
             requestPermissions(
@@ -144,70 +149,70 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
             )
         )
 
+        // put a marker to location that the user selected
+        map.setOnPoiClickListener { poi ->
+
+            // Set the new Data
+            selectedPOI = poi
+            updatedPOIName = poi.name.replace(
+                "\n" +
+                        "           \n" +
+                        "             …", ""
+            ) // Update the map location Text to not have unnecessarily large blank text
+
+            // Move camera to the selected location
+            map.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    poi.latLng, 14F
+                )
+            )
+
+            // Method for extra stuff
+            updateMap()
+
+            // hide the reminder text
+            binding.reminderText.visibility = View.GONE
+
+            // Show the select this location fab button
+            select_location_fab.show()
+
+            // show Bottom Drawer
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            location_title_text.text = updatedPOIName
+        }
+
+        // put a marker to location that the user selected
+        map.setOnMapClickListener { pos ->
+
+            // Set the new Data
+            selectedPOI = null
+            updatedPOIName = "(${pos.latitude.round(3)}, ${pos.longitude.round(3)})"
+            selectedMapLatLng = pos
+
+            // Move camera to the selected location
+            map.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    pos, 14F
+                )
+            )
+
+            // Method for extra stuff
+            updateMap()
+
+            // hide the reminder text
+            binding.reminderText.visibility = View.GONE
+
+            // Show the select this location fab button
+            select_location_fab.show()
+
+            // show Bottom Drawer
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            location_title_text.text = updatedPOIName
+        }
+
         if (permissionGranted) {
             // Shows my location only if the permission is granted
             map.isMyLocationEnabled = permissionGranted
-
-            // put a marker to location that the user selected
-            map.setOnPoiClickListener { poi ->
-
-                // Set the new Data
-                selectedPOI = poi
-                updatedPOIName = poi.name.replace(
-                    "\n" +
-                            "           \n" +
-                            "             …", ""
-                ) // Update the map location Text to not have unnecessarily large blank text
-
-                // Move camera to the selected location
-                map.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        poi.latLng, 14F
-                    )
-                )
-
-                // Method for extra stuff
-                updateMap()
-
-                // hide the reminder text
-                binding.reminderText.visibility = View.GONE
-
-                // Show the select this location fab button
-                select_location_fab.show()
-
-                // show Bottom Drawer
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                location_title_text.text = updatedPOIName
-            }
-
-            // put a marker to location that the user selected
-            map.setOnMapClickListener { pos ->
-
-                // Set the new Data
-                selectedPOI = null
-                updatedPOIName = "(${pos.latitude.round(3)}, ${pos.longitude.round(3)})"
-                selectedMapLatLng = pos
-
-                // Move camera to the selected location
-                map.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        pos, 14F
-                    )
-                )
-
-                // Method for extra stuff
-                updateMap()
-
-                // hide the reminder text
-                binding.reminderText.visibility = View.GONE
-
-                // Show the select this location fab button
-                select_location_fab.show()
-
-                // show Bottom Drawer
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                location_title_text.text = updatedPOIName
-            }
 
             // zoom to the user location after taking his permission
             fusedLocationClient.lastLocation
@@ -343,7 +348,11 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
     }
 
     @SuppressLint("MissingPermission")
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -351,7 +360,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, AdapterView.O
             } else {
                 _viewModel.showSnackBar.postValue(getString(R.string.permission_denied_explanation))
             }
-            mapFragment = childFragmentManager.findFragmentById(R.id.google_map) as SupportMapFragment
+            mapFragment =
+                childFragmentManager.findFragmentById(R.id.google_map) as SupportMapFragment
             mapFragment.getMapAsync(this)
         }
     }
